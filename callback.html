@@ -4,32 +4,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Callback</title>
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js" defer></script>
+  <!-- Remove defer and use onload -->
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js" onload="handleRedirect()"></script>
 </head>
 <body>
   <p>Processing login...</p>
+
   <script>
     async function handleRedirect() {
+      if (!window.createAuth0Client) {
+        console.error("Auth0 SDK not loaded yet");
+        document.body.innerHTML = "<p>Auth0 SDK failed to load. Try refreshing.</p>";
+        return;
+      }
+
       const AUTH0_DOMAIN   = "dev-7qrkhpu6m3l7j1uq.us.auth0.com";
       const AUTH0_CLIENTID = "9UaKI0gCeDo836SurDwGwmDOAeRndt9U";
       const RETURN_URL     = "https://resqanalytics.github.io/EAVSPROD/";
 
-      const auth0 = await createAuth0Client({
-        domain: AUTH0_DOMAIN,
-        clientId: AUTH0_CLIENTID,
-        cacheLocation: "localstorage"
-      });
-
       try {
+        const auth0 = await createAuth0Client({
+          domain: AUTH0_DOMAIN,
+          clientId: AUTH0_CLIENTID,
+          cacheLocation: "localstorage"
+        });
+
         await auth0.handleRedirectCallback();
-      } catch (e) {
-        console.error("Callback error:", e);
+
+        // Redirect back to main page
+        window.location.href = RETURN_URL + "?logged_in=true";
+
+      } catch (err) {
+        console.error("Callback error:", err);
+        document.body.innerHTML = "<p>Login failed. Check console for details.</p>";
       }
-
-      window.location.href = RETURN_URL + "?logged_in=true";
     }
-
-    window.addEventListener("load", handleRedirect);
   </script>
 </body>
 </html>
