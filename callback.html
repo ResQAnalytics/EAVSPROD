@@ -21,14 +21,11 @@
       });
 
       try {
-        // Handle redirect back from Auth0
-        const result = await auth0.handleRedirectCallback();
-        console.log("Redirect result:", result);
+        await auth0.handleRedirectCallback();
       } catch (e) {
         console.error("Callback error:", e);
       }
 
-      // Redirect back to main page
       window.location.href = RETURN_URL + "?logged_in=true";
     }
 
@@ -36,4 +33,5 @@
   </script>
 </body>
 </html>
+
 
