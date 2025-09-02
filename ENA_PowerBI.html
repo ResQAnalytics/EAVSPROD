@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Power BI: EAVS Rescue Dashboard</title>
 
   <!-- Auth0 SPA SDK -->
@@ -56,73 +56,71 @@
   </div>
 
 <script>
-  const loginBtn = document.getElementById("login-btn");
-  const logoutLink = document.getElementById("logout-link");
-  let auth0Client;
+const loginBtn = document.getElementById("login-btn");
+const logoutLink = document.getElementById("logout-link");
+let auth0Client;
 
-  async function initAuth0() {
-    if (!window.createAuth0Client) {
-      console.error("Auth0 SDK not loaded!");
-      document.getElementById("status").innerText = "Auth0 SDK failed to load.";
-      return;
-    }
-
-    // === Config ===
-    const AUTH0_DOMAIN   = "dev-7qrkhpu6m3l7j1uq.us.auth0.com";
-    const AUTH0_CLIENTID = "9UaKI0gCeDo836SurDwGwmDOAeRndt9U";
-    const CALLBACK_URL   = "https://resqanalytics.github.io/EAVSPROD/callback.html";
-    const RETURN_URL     = "https://resqanalytics.github.io/EAVSPROD/";
-    const CONNECTION_NAME = "PectoraRESQ-SAML";
-
-    try {
-      auth0Client = await createAuth0Client({
-        domain: AUTH0_DOMAIN,
-        clientId: AUTH0_CLIENTID,
-        cacheLocation: "localstorage",
-        authorizationParams: { scope: "openid profile email" }
-      });
-
-      loginBtn.disabled = false;
-      loginBtn.innerText = "Login";
-
-      loginBtn.onclick = () => {
-        const params = { authorizationParams: { redirect_uri: CALLBACK_URL, scope: "openid profile email" } };
-        if (CONNECTION_NAME) params.authorizationParams.connection = CONNECTION_NAME;
-        auth0Client.loginWithRedirect(params);
-      };
-
-      logoutLink.onclick = (e) => {
-        e.preventDefault();
-        window.location.href = `https://${AUTH0_DOMAIN}/v2/logout?returnTo=${encodeURIComponent(RETURN_URL)}&client_id=${encodeURIComponent(AUTH0_CLIENTID)}`;
-      };
-
-      const isAuthenticated = await auth0Client.isAuthenticated();
-      if (isAuthenticated) {
-        document.getElementById("login-card").style.display = "none";
-        showAgreementModal();
-        logoutLink.style.display = "inline-block";
-        document.getElementById("status").innerText = "Authenticated.";
-      } else {
-        document.getElementById("status").innerText = "Not authenticated.";
-      }
-
-    } catch (e) {
-      console.error("Auth0 init error:", e);
-      document.getElementById("status").innerText = "Auth0 init error: " + (e.message || e);
-    }
+async function initAuth0() {
+  if (!window.createAuth0Client) {
+    document.getElementById("status").innerText = "Auth0 SDK not loaded.";
+    return;
   }
 
-  function showAgreementModal() {
-    document.getElementById("agreement-modal").style.display = "flex";
+  const AUTH0_DOMAIN   = "dev-7qrkhpu6m3l7j1uq.us.auth0.com";
+  const AUTH0_CLIENTID = "9UaKI0gCeDo836SurDwGwmDOAeRndt9U";
+  const CALLBACK_URL   = "https://resqanalytics.github.io/EAVSPROD/callback.html";
+  const RETURN_URL     = "https://resqanalytics.github.io/EAVSPROD/";
+  const CONNECTION_NAME = "PectoraRESQ-SAML";
+
+  try {
+    auth0Client = await createAuth0Client({
+      domain: AUTH0_DOMAIN,
+      clientId: AUTH0_CLIENTID,
+      cacheLocation: "localstorage",
+      authorizationParams: { scope: "openid profile email" }
+    });
+
+    loginBtn.disabled = false;
+    loginBtn.innerText = "Login";
+
+    loginBtn.onclick = () => {
+      const params = { authorizationParams: { redirect_uri: CALLBACK_URL, scope: "openid profile email" } };
+      if (CONNECTION_NAME) params.authorizationParams.connection = CONNECTION_NAME;
+      auth0Client.loginWithRedirect(params);
+    };
+
+    logoutLink.onclick = (e) => {
+      e.preventDefault();
+      window.location.href = `https://${AUTH0_DOMAIN}/v2/logout?returnTo=${encodeURIComponent(RETURN_URL)}&client_id=${encodeURIComponent(AUTH0_CLIENTID)}`;
+    };
+
+    const isAuthenticated = await auth0Client.isAuthenticated();
+    if (isAuthenticated) {
+      document.getElementById("login-card").style.display = "none";
+      showAgreementModal();
+      logoutLink.style.display = "inline-block";
+      document.getElementById("status").innerText = "Authenticated.";
+    } else {
+      document.getElementById("status").innerText = "Not authenticated.";
+    }
+
+  } catch (e) {
+    console.error("Auth0 init error:", e);
+    document.getElementById("status").innerText = "Auth0 init error: " + (e.message || e);
   }
+}
 
-  document.getElementById("accept-btn").addEventListener("click", () => {
-    document.getElementById("agreement-modal").style.display = "none";
-    document.getElementById("report-frame").style.display = "block";
-    document.getElementById("report-frame").scrollIntoView({behavior:"smooth"});
-  });
+function showAgreementModal() {
+  document.getElementById("agreement-modal").style.display = "flex";
+}
 
-  window.addEventListener("load", initAuth0);
+document.getElementById("accept-btn").addEventListener("click", () => {
+  document.getElementById("agreement-modal").style.display = "none";
+  document.getElementById("report-frame").style.display = "block";
+  document.getElementById("report-frame").scrollIntoView({behavior:"smooth"});
+});
+
+window.addEventListener("load", initAuth0);
 </script>
 </body>
 </html>
