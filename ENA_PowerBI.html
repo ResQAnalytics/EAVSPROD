@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Power BI: EAVS Rescue Dashboard</title>
 
-  <!-- Auth0 SPA SDK -->
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+  <!-- Auth0 SPA SDK with onload -->
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js" onload="initAuth0()"></script>
 
   <style>
     body { margin:0; padding:0; font-family: Arial, sans-serif; background:#f2f2f2; height:100vh; display:flex; align-items:center; justify-content:center; }
@@ -55,8 +55,7 @@
   </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  // Wait until Auth0 SDK is loaded
+async function initAuth0() {
   if (!window.createAuth0Client) {
     console.error("Auth0 SDK not loaded");
     document.getElementById("status").innerText = "Auth0 SDK not loaded";
@@ -69,19 +68,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const RETURN_URL     = "https://resqanalytics.github.io/EAVSPROD/";
   const CONNECTION_NAME = "PectoraRESQ-SAML";
 
-  let auth0Client;
-
   try {
-    auth0Client = await createAuth0Client({
+    const auth0Client = await createAuth0Client({
       domain: AUTH0_DOMAIN,
       clientId: AUTH0_CLIENTID,
       cacheLocation: "localstorage",
       authorizationParams: { scope: "openid profile email" }
     });
 
-    // Assign login button after client created
     document.getElementById("login-btn").addEventListener("click", async () => {
-      console.log("Login button clicked");
       const params = { authorizationParams: { redirect_uri: CALLBACK_URL, scope: "openid profile email" } };
       if (CONNECTION_NAME) params.authorizationParams.connection = CONNECTION_NAME;
       try {
@@ -107,11 +102,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById("status").innerText = "Not authenticated.";
     }
 
-  } catch(e) {
-    console.error("Auth0 initialization error:", e);
+  } catch(err) {
+    console.error("Auth0 initialization error:", err);
     document.getElementById("status").innerText = "Auth0 init error";
   }
-});
+}
 
 function showAgreementModal() {
   document.getElementById("agreement-modal").style.display = "flex";
