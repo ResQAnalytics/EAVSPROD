@@ -16,6 +16,7 @@
     p{ color:#555; }
     .btn{ background:#1976D2; color:#fff; padding:12px 20px; border:0; border-radius:8px; cursor:pointer; font-size:16px; }
     .btn:hover{ background:#1565C0; }
+    .btn:disabled{ background:#888; cursor:not-allowed; }
     .link{ color:#1976D2; text-decoration:underline; cursor:pointer; margin-left:12px; }
     iframe{ width:100%; height:80vh; border:0; display:none; margin-top:20px; }
     .modal{ position:fixed; inset:0; background:rgba(0,0,0,0.65); display:none; align-items:center; justify-content:center; z-index:2000; }
@@ -29,7 +30,7 @@
     <div id="login-card" class="card">
       <h1>Welcome — EAVS Rescue Dashboard</h1>
       <p>Authenticate with your organization SSO (Pectora as IdP via Auth0).</p>
-      <button id="login-btn" class="btn">Login</button>
+      <button id="login-btn" class="btn" disabled>Loading...</button>
       <a id="logout-link" class="link" href="#" style="display:none;">Logout</a>
       <div class="muted" id="status"></div>
     </div>
@@ -55,12 +56,15 @@
   </div>
 
 <script>
+  const loginBtn = document.getElementById("login-btn");
+  let auth0Client;
+
   // Poll until Auth0 SDK is loaded
   function waitForAuth0(callback) {
     if (window.createAuth0Client) {
       callback();
     } else {
-      setTimeout(() => waitForAuth0(callback), 50); // check every 50ms
+      setTimeout(() => waitForAuth0(callback), 50);
     }
   }
 
@@ -73,7 +77,6 @@
     const CONNECTION_NAME = "PectoraRESQ-SAML";
     // ====================================
 
-    let auth0Client;
     try {
       auth0Client = await createAuth0Client({
         domain: AUTH0_DOMAIN,
@@ -82,19 +85,25 @@
         authorizationParams: { scope: "openid profile email" }
       });
 
-      const isAuthenticated = await auth0Client.isAuthenticated();
+      // Enable login button
+      loginBtn.disabled = false;
+      loginBtn.innerText = "Login";
 
-      document.getElementById("login-btn").onclick = () => {
+      // Login click handler
+      loginBtn.onclick = () => {
         const params = { authorizationParams: { redirect_uri: CALLBACK_URL, scope: "openid profile email" } };
         if (CONNECTION_NAME) params.authorizationParams.connection = CONNECTION_NAME;
         auth0Client.loginWithRedirect(params);
       };
 
+      // Logout click handler
       document.getElementById("logout-link").onclick = (e) => {
         e.preventDefault();
         window.location.href = `https://${AUTH0_DOMAIN}/v2/logout?returnTo=${encodeURIComponent(RETURN_URL)}&client_id=${encodeURIComponent(AUTH0_CLIENTID)}`;
       };
 
+      // Check if already authenticated
+      const isAuthenticated = await auth0Client.isAuthenticated();
       if (isAuthenticated || new URLSearchParams(window.location.search).get("logged_in") === "true") {
         document.getElementById("login-card").style.display = "none";
         showAgreementModal();
@@ -105,8 +114,8 @@
       }
 
     } catch (e) {
-      console.error(e);
-      document.getElementById("status").innerText = "Auth error: " + (e && e.message ? e.message : e);
+      console.error("Auth0 init error:", e);
+      document.getElementById("status").innerText = "Auth init error: " + (e.message || e);
     }
   });
 
@@ -122,4 +131,3 @@
 </script>
 </body>
 </html>
-
