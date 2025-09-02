@@ -3,35 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auth Callback — EAVS Rescue Dashboard</title>
+  <title>Callback</title>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js" defer></script>
 </head>
 <body>
   <p>Processing login...</p>
-
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
   <script>
-    const AUTH0_DOMAIN   = "dev-7qrkhpu6m3l7j1uq.us.auth0.com";
-    const AUTH0_CLIENTID = "9UaKI0gCeDo836SurDwGwmDOAeRndt9U";
-    const RETURN_URL     = "https://resqanalytics.github.io/EAVSPROD/";
+    async function handleRedirect() {
+      const AUTH0_DOMAIN   = "dev-7qrkhpu6m3l7j1uq.us.auth0.com";
+      const AUTH0_CLIENTID = "9UaKI0gCeDo836SurDwGwmDOAeRndt9U";
+      const RETURN_URL     = "https://resqanalytics.github.io/EAVSPROD/";
 
-    (async function() {
+      const auth0 = await createAuth0Client({
+        domain: AUTH0_DOMAIN,
+        clientId: AUTH0_CLIENTID,
+        cacheLocation: "localstorage"
+      });
+
       try {
-        const auth0 = await createAuth0Client({
-          domain: AUTH0_DOMAIN,
-          clientId: AUTH0_CLIENTID,
-          cacheLocation: "localstorage"
-        });
-
-        // Handle the redirect callback
-        await auth0.handleRedirectCallback();
-
-        // Redirect back to main page and indicate logged in
-        window.location.href = RETURN_URL + "?logged_in=true";
-      } catch (err) {
-        console.error("Callback error:", err);
-        document.body.innerHTML = "<p>Login failed. Check console for details.</p>";
+        // Handle redirect back from Auth0
+        const result = await auth0.handleRedirectCallback();
+        console.log("Redirect result:", result);
+      } catch (e) {
+        console.error("Callback error:", e);
       }
-    })();
+
+      // Redirect back to main page
+      window.location.href = RETURN_URL + "?logged_in=true";
+    }
+
+    window.addEventListener("load", handleRedirect);
   </script>
 </body>
 </html>
+
