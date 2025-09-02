@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Power BI: EAVS Rescue Dashboard</title>
 
-  <!-- Auth0 SPA SDK -->
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
-
   <style>
     body { margin:0; padding:0; font-family: Arial, sans-serif; background:#f2f2f2; height:100vh; display:flex; align-items:center; justify-content:center; }
     .wrap{ width:95%; max-width:980px; text-align:center; }
@@ -27,7 +24,7 @@
 <body>
   <div class="wrap">
     <div id="login-card" class="card">
-      <h1>Welcome — Ellis International Rescue Dashboard</h1>
+      <h1>Welcome — EAVS Rescue Dashboard</h1>
       <p>Authenticate with your organization SSO (Pectora as IdP via Auth0).</p>
       <button id="login-btn" class="btn">Login</button>
       <a id="logout-link" class="link" href="#" style="display:none;">Logout</a>
@@ -36,7 +33,7 @@
 
     <iframe 
       id="report-frame"
-      title="Ellis International Rescue Dashboard" 
+      title="EAVS Production Dashboard" 
       src="https://app.powerbi.com/view?r=eyJrIjoiZGJmYWMxZjItNWI5OC00NmM4LTg2YTktOTkyYzExNDYzZTY2IiwidCI6ImI4MDM2M2IxLWE1NzAtNDAwMi05YzI4LTg2YzUxY2EwOTEzOCIsImMiOjZ9"
       allowFullScreen="true">
     </iframe>
@@ -55,20 +52,20 @@
   </div>
 
 <script>
-  window.addEventListener('load', async () => {
-    if (!window.createAuth0Client) {
-      console.error("Auth0 SDK not loaded yet");
-      document.getElementById("status").innerText = "Auth0 SDK not loaded";
-      return;
-    }
+  // Dynamically load Auth0 SPA JS SDK
+  const script = document.createElement('script');
+  script.src = "https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js";
+  script.onload = initAuth0;  // initialize after SDK loads
+  document.head.appendChild(script);
 
-    // ====== CONFIG — GitHub Pages version ======
+  async function initAuth0() {
+    // ====== CONFIG — GitHub Pages ======
     const AUTH0_DOMAIN   = "dev-7qrkhpu6m3l7j1uq.us.auth0.com";
     const AUTH0_CLIENTID = "9UaKI0gCeDo836SurDwGwmDOAeRndt9U";
     const CALLBACK_URL   = "https://resqanalytics.github.io/EAVSPROD/callback.html";
     const RETURN_URL     = "https://resqanalytics.github.io/EAVSPROD/";
-    const CONNECTION_NAME = "PectoraRESQ-SAML"; 
-    // ===========================================
+    const CONNECTION_NAME = "PectoraRESQ-SAML";
+    // ====================================
 
     let auth0Client;
 
@@ -106,7 +103,7 @@
       console.error(e);
       document.getElementById("status").innerText = "Auth error: " + (e && e.message ? e.message : e);
     }
-  });
+  }
 
   function showAgreementModal() {
     document.getElementById("agreement-modal").style.display = "flex";
@@ -120,4 +117,3 @@
 </script>
 </body>
 </html>
-
