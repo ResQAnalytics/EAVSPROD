@@ -1,22 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Power BI: EAVS Rescue Dashboard</title>
 
   <!-- Auth0 SPA SDK -->
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js" defer></script>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
 
   <style>
-    body { margin:0; padding:0; font-family: Arial, sans-serif; background:#f2f2f2; height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; }
+    body { margin:0; padding:0; font-family: Arial, sans-serif; background:#f2f2f2; height:100vh; display:flex; align-items:center; justify-content:center; }
     .wrap{ width:95%; max-width:980px; text-align:center; }
-    .card{ padding:28px; background:white; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.08); margin-top:20px; }
+    .card{ padding:28px; background:white; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.08); }
     h1{ margin:0 0 10px 0; font-size:22px; color:#333; }
     p{ color:#555; }
     .btn{ background:#1976D2; color:#fff; padding:12px 20px; border:0; border-radius:8px; cursor:pointer; font-size:16px; }
     .btn:hover{ background:#1565C0; }
-    .btn:disabled{ background:#888; cursor:not-allowed; }
     .link{ color:#1976D2; text-decoration:underline; cursor:pointer; margin-left:12px; }
     iframe{ width:100%; height:80vh; border:0; display:none; margin-top:20px; }
     .modal{ position:fixed; inset:0; background:rgba(0,0,0,0.65); display:none; align-items:center; justify-content:center; z-index:2000; }
@@ -30,7 +29,7 @@
     <div id="login-card" class="card">
       <h1>Welcome — EAVS Rescue Dashboard</h1>
       <p>Authenticate with your organization SSO (Pectora as IdP via Auth0).</p>
-      <button id="login-btn" class="btn" disabled>Loading...</button>
+      <button id="login-btn" class="btn">Login</button>
       <a id="logout-link" class="link" href="#" style="display:none;">Logout</a>
       <div class="muted" id="status"></div>
     </div>
@@ -56,71 +55,69 @@
   </div>
 
 <script>
-const loginBtn = document.getElementById("login-btn");
-const logoutLink = document.getElementById("logout-link");
-let auth0Client;
-
-async function initAuth0() {
-  if (!window.createAuth0Client) {
-    document.getElementById("status").innerText = "Auth0 SDK not loaded.";
-    return;
-  }
-
-  const AUTH0_DOMAIN   = "dev-7qrkhpu6m3l7j1uq.us.auth0.com";
-  const AUTH0_CLIENTID = "9UaKI0gCeDo836SurDwGwmDOAeRndt9U";
-  const CALLBACK_URL   = "https://resqanalytics.github.io/EAVSPROD/callback.html";
-  const RETURN_URL     = "https://resqanalytics.github.io/EAVSPROD/";
-  const CONNECTION_NAME = "PectoraRESQ-SAML";
-
-  try {
-    auth0Client = await createAuth0Client({
-      domain: AUTH0_DOMAIN,
-      clientId: AUTH0_CLIENTID,
-      cacheLocation: "localstorage",
-      authorizationParams: { scope: "openid profile email" }
-    });
-
-    loginBtn.disabled = false;
-    loginBtn.innerText = "Login";
-
-    loginBtn.onclick = () => {
-      const params = { authorizationParams: { redirect_uri: CALLBACK_URL, scope: "openid profile email" } };
-      if (CONNECTION_NAME) params.authorizationParams.connection = CONNECTION_NAME;
-      auth0Client.loginWithRedirect(params);
-    };
-
-    logoutLink.onclick = (e) => {
-      e.preventDefault();
-      window.location.href = `https://${AUTH0_DOMAIN}/v2/logout?returnTo=${encodeURIComponent(RETURN_URL)}&client_id=${encodeURIComponent(AUTH0_CLIENTID)}`;
-    };
-
-    const isAuthenticated = await auth0Client.isAuthenticated();
-    if (isAuthenticated) {
-      document.getElementById("login-card").style.display = "none";
-      showAgreementModal();
-      logoutLink.style.display = "inline-block";
-      document.getElementById("status").innerText = "Authenticated.";
-    } else {
-      document.getElementById("status").innerText = "Not authenticated.";
+  window.addEventListener('load', async () => {
+    if (!window.createAuth0Client) {
+      console.error("Auth0 SDK not loaded yet");
+      document.getElementById("status").innerText = "Auth0 SDK not loaded";
+      return;
     }
 
-  } catch (e) {
-    console.error("Auth0 init error:", e);
-    document.getElementById("status").innerText = "Auth0 init error: " + (e.message || e);
+    // ====== CONFIG — GitHub Pages version ======
+    const AUTH0_DOMAIN   = "dev-7qrkhpu6m3l7j1uq.us.auth0.com";
+    const AUTH0_CLIENTID = "9UaKI0gCeDo836SurDwGwmDOAeRndt9U";
+    const CALLBACK_URL   = "https://resqanalytics.github.io/EAVSPROD/callback.html";
+    const RETURN_URL     = "https://resqanalytics.github.io/EAVSPROD/";
+    const CONNECTION_NAME = "PectoraRESQ-SAML"; 
+    // ===========================================
+
+    let auth0Client;
+
+    try {
+      auth0Client = await createAuth0Client({
+        domain: AUTH0_DOMAIN,
+        clientId: AUTH0_CLIENTID,
+        cacheLocation: "localstorage",
+        authorizationParams: { scope: "openid profile email" }
+      });
+
+      const isAuthenticated = await auth0Client.isAuthenticated();
+
+      document.getElementById("login-btn").onclick = () => {
+        const params = { authorizationParams: { redirect_uri: CALLBACK_URL, scope: "openid profile email" } };
+        if (CONNECTION_NAME) params.authorizationParams.connection = CONNECTION_NAME;
+        auth0Client.loginWithRedirect(params);
+      };
+
+      document.getElementById("logout-link").onclick = (e) => {
+        e.preventDefault();
+        window.location.href = `https://${AUTH0_DOMAIN}/v2/logout?returnTo=${encodeURIComponent(RETURN_URL)}&client_id=${encodeURIComponent(AUTH0_CLIENTID)}`;
+      };
+
+      if (isAuthenticated || new URLSearchParams(window.location.search).get("logged_in") === "true") {
+        document.getElementById("login-card").style.display = "none";
+        showAgreementModal();
+        document.getElementById("logout-link").style.display = "inline-block";
+        document.getElementById("status").innerText = "Authenticated.";
+      } else {
+        document.getElementById("status").innerText = "Not authenticated.";
+      }
+
+    } catch (e) {
+      console.error(e);
+      document.getElementById("status").innerText = "Auth error: " + (e && e.message ? e.message : e);
+    }
+  });
+
+  function showAgreementModal() {
+    document.getElementById("agreement-modal").style.display = "flex";
   }
-}
 
-function showAgreementModal() {
-  document.getElementById("agreement-modal").style.display = "flex";
-}
-
-document.getElementById("accept-btn").addEventListener("click", () => {
-  document.getElementById("agreement-modal").style.display = "none";
-  document.getElementById("report-frame").style.display = "block";
-  document.getElementById("report-frame").scrollIntoView({behavior:"smooth"});
-});
-
-window.addEventListener("load", initAuth0);
+  document.getElementById("accept-btn").addEventListener("click", () => {
+    document.getElementById("agreement-modal").style.display = "none";
+    document.getElementById("report-frame").style.display = "block";
+    document.getElementById("report-frame").scrollIntoView({behavior:"smooth"});
+  });
 </script>
 </body>
 </html>
+
