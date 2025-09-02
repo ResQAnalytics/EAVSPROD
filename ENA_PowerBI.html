@@ -11,6 +11,7 @@
       font-family: Arial, sans-serif;
       background: #f4f4f9;
     }
+
     /* Login Screen */
     #login-screen {
       text-align: center;
@@ -33,6 +34,7 @@
     .login-button:hover {
       background: #1565C0;
     }
+
     /* Modals */
     .modal {
       display: none;
@@ -69,6 +71,7 @@
     .modal-content button:hover {
       background: #45a049;
     }
+
     /* Dashboard */
     #dashboard {
       display: none;
@@ -123,7 +126,7 @@
   </div>
 
   <script>
-    // SAML login redirect
+    // Redirect to Auth0 SAML login
     function startSAMLLogin() {
       const auth0Domain = "dev-7qrkhpu6m3l7j1uq.us.auth0.com";
       const connection = "PectoraRESQ-SAML";
@@ -154,13 +157,13 @@
 
     window.onload = handleAuth;
 
-    // Terms Modal
+    // Accept Terms
     document.getElementById("acceptTerms").addEventListener("click", () => {
       document.getElementById("termsModal").style.display = "none";
       document.getElementById("dashboard").style.display = "block";
     });
 
-    // Agreement Modal
+    // Accept Agreement
     document.getElementById("accept-button").addEventListener("click", () => {
       document.getElementById("agreement-modal").style.display = "none";
       document.getElementById("report-frame").style.display = "block";
@@ -170,11 +173,15 @@
     document.getElementById("btn-logout").addEventListener("click", () => {
       auth0Client.logout({
         logoutParams: {
-          returnTo: window.location.origin + "/EAVSPROD/Dashboard_Beta.html"
+          returnTo: window.location.origin + "/EAVSPROD/ENA_PowerBI.html"
         }
       });
     });
   </script>
+
+</body>
+</html>
+
 
 </body>
 </html>
